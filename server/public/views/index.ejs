@@ -12,38 +12,49 @@
         <br>
         <div class="container">
             <div class="row">
-                <div class="col-md-3 col-md-offset-1 col-sm-3 col-sm-offset-1 stats">
-                    <h4>User name: <%= user.nick %></h4>
+                <div class="col-md-3 col-sm-3 stats">
+                    <h4>Nick: <strong><%= user.nick %></strong></h4>
                     <p class="plays">Plays: <%= user.playsCount %> </p>
-                    <p class="winns">Wins: <%= (user.wins/user.playsCount*100) %>%</p>
-                    <p class="scope" id="gameScope">Scope now: </p>
+                    <%   if (user.wins != 0 && user.playsCount !=0){ %>
+                      <p class="winns">Wins: <%= user.wins %>  (<%= (user.wins/user.playsCount*100).toFixed(1)  %>%) </p>
+                    <% } else {%>
+                      <p class="winns">Wins: 0</p>
+
+                    <% } %>
+                    <div class="btn btn-danger disabled" id="gameScope">
+                      Score now: 0
+                    </div>
                 </div>
-                <div class="col-md-3 col-sm-3">
+                <div class="col-md-6 col-sm-6">
                     <div class="dealer">
                         <p>Dealer</p>
-                        <div class="dealer-card">
+                        <ul class="dealer-cards">
+                          <li>
                             <p id="d1">
                                 <i class="fa fa-heart" aria-hidden="true"></i>
                             </p>
-                        </div>
-                        <div class="dealer-card">
+                          </li>
+                          <li>
                             <p id="d2">
                                 <i class="fa fa-heart" aria-hidden="true"></i>
                             </p>
-                        </div>
+                          </li>
+                        </ul>
                     </div>
                     <div class="player">
                         <p>Player</p>
-                        <div class="player-card">
+                        <ul class="player-cards">
+                          <li>
                             <p id="p1">
                                 <i class="fa fa-heart" aria-hidden="true"></i>
                             </p>
-                        </div>
-                        <div class="player-card">
+                          </li>
+                          <li>
                             <p id="p2">
                                 <i class="fa fa-heart" aria-hidden="true"></i>
                             </p>
-                        </div>
+                          </li>
+                        </ul>
                     </div>
                 </div>
                 <div class="col-md-3 col-sm-3 ">
@@ -63,7 +74,6 @@
       var socket = io.connect('http://localhost:5000');
       socket.emit('sendUser', '<%= user._id %>');
       socket.on('reload',()=>{
-        console.log("reload");
         location.reload();
       })
       $('#addcard').hide();
@@ -72,6 +82,7 @@
       function start(){
         $('#addcard').show();
         $('#results').show();
+        $('#start').hide();
         $('.scope').show();
           function getRandomInt(min, max) {
               return Math.floor(Math.random() * (max - min + 1)) + min;
@@ -98,18 +109,17 @@
               return "Дилер: " + dealer.join(" ") + "  Игрок: " + player.join(" ") + ".";
           }
           function addCard(){
-            console.log("Call")
               let cardNumber = getCard();
-              $('#gameScope').text(`Scope now: ${getSum(player)}`);
-              $('.player').append(`
-                   <div class="player-card">
-                          <p id="p1">
-                              ${cardNumber}
-                          </p>
-                      </div>
+              $('#gameScope').text(`Score now: ${getSum(player)}`);
+              let i = 3;
+              $('.player-cards').append(`
+                <li>
+                  <p id="p${i}">
+                      ${cardNumber}
+                  </p>
+                </li>
               `);
-              $('.player-card').css("padding", "0px 15%");
-              $('.player-card').css("width", "0px");
+              i++;
               return(cardNumber);
           }
           let dealer = [getCard(), getCard()];
@@ -118,11 +128,19 @@
           $('#p1').text(player[0]);
           $('#p2').text(player[1]);
           $('#d1').text(dealer[0]);
-          $('#gameScope').text(`Scope now: ${getSum(player)}`);
+          $('#gameScope').text(`Score now: ${getSum(player)}`);
           $('#addcard').click(function(){
-            let newCard = addCard();
-            player.push(newCard);
-            $('#gameScope').text(`Scope now: ${getSum(player)}`);
+            if (getSum(player) >= 21) {
+              alert(`Проигрыш!! Вы набрали ${getSum(player)} очка(ов) и проиграли, нажмите 'ОК' для новой игры`);
+              socket.emit('playerLoose', getSum(player), getSum(dealer));
+            } else{
+              let newCard = addCard();
+              player.push(newCard);
+              $('#gameScope').text(`Scope now: ${getSum(player)}`);
+              if (getSum(player) >= 21){
+                $('#addcard').hide();
+              }
+            }
           })
           $('#results').click(function(){
             checkResults();
@@ -133,6 +151,9 @@
             if (playerSum > 21 || playerSum == 21){
               if (playerSum > 21) {
                 alert(`Проигрыш!! Вы набрали ${playerSum} очка(ов) и проиграли, нажмите 'ОК' для новой игры`);
+                // $('#myModal').css("display", "block");
+                // $('#myModal').addClass(" in");
+
                 socket.emit('playerLoose', playerSum, dealerSum);
               } else if (playerSum == 21 && dealerSum == 21 ) {
                 alert(`Ничья!! Вы набрали 21 очко как и дилер, нажмите 'ОК' для новой игры`);

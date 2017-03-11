@@ -20,10 +20,11 @@ module.exports = function (app) {
     app.get('/user/login', main_controller.login);
     app.post('/user/login', main_controller.Postlogin);
     app.get('/user/logout', main_controller.logout);
+    app.get('/404', main_controller.notFound);
 
     app.use((req, res, next) => {
         res.status(404);
-        return res.json({ error: 'Not found' });
+        return res.redirect('/404')
     });
 
     app.use((err, req, res, next) => {

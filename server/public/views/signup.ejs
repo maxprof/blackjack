@@ -10,22 +10,24 @@
     <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700" />
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/latest/css/font-awesome.min.css" />
     <link rel="stylesheet" href="../public/views/style.css">
+    <link rel="stylesheet" href="../public/views/form-style.css">
+    
 </head>
 <body class="signup-page">
   <div class="container">
-    <div class="row">
-      <div class="col-md-6 col-md-offset-2">
-        <form class="form" autocomplete="off" method="POST" action="">
-            <div class="input-group">
-                <input type="text" class="form-control" name="nick" placeholder="nickname">
-            </div>
-            <div class="input-group">
-                <input  type="password" class="form-control" name="password" placeholder="Password">
-            </div>
-            <button class="btn  btn-primary" type="submit">Login</button>
-         </form>
-      </div>
-    </div>
+    <form class="form" autocomplete="off" method="POST" id="contact" action="">
+      <h3>Sign up</h3>
+      <h4>or <a href="/user/login">Log in</a></h4>
+      <fieldset>
+        <input placeholder="Your nick" type="text" tabindex="1" name="nick" required autofocus>
+      </fieldset>
+      <fieldset>
+        <input placeholder="Your password" type="password" name="password" tabindex="2" required>
+      </fieldset>
+      <fieldset>
+        <button name="submit" type="submit" id="contact-submit" data-submit="...Sending">Sign up</button>
+      </fieldset>
+    </form>
   </div>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
   <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>

@@ -94,10 +94,7 @@ module.exports = {
         res.cookie("token", '');
         return res.status(200).redirect('/user/login');
     },
-
-    userProfile: function userProfile(req, res, next) {
-        res.render('index.ejs', {
-            user: req.user ? req.user : null
-        });
+    notFound: function notFound(req, res) {
+        return res.render('404.ejs');
     }
 };
