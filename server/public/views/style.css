@@ -99,3 +99,12 @@ i.fa.fa-heart {
   -webkit-background-size: cover;
   background-size: cover;
 }
+.modal-footer{
+  text-align: center;
+}
+.alert{
+  margin-bottom: 0;
+}
+button#submitModal {
+    width: 100%;
+}

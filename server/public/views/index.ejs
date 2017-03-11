@@ -12,69 +12,86 @@
         <br>
         <div class="container">
             <div class="row">
-                <div class="col-md-3 col-sm-3 stats">
-                    <h4>Nick: <strong><%= user.nick %></strong></h4>
-                    <p class="plays">Plays: <%= user.playsCount %> </p>
-                    <%   if (user.wins != 0 && user.playsCount !=0){ %>
-                      <p class="winns">Wins: <%= user.wins %>  (<%= (user.wins/user.playsCount*100).toFixed(1)  %>%) </p>
-                    <% } else {%>
-                      <p class="winns">Wins: 0</p>
+              <div class="modal fade" id="playerModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                <div class="modal-dialog" role="document">
+                  <div class="modal-content">
+                    <div class="modal-body">
+                      <p id="lose-info-message" class="alert text-center"></p>
+                    </div>
+                    <div class="modal-footer">
+                      <button type="submit" class="btn btn-success" id="submitModal">Ok</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
 
-                    <% } %>
-                    <div class="btn btn-danger disabled" id="gameScope">
-                      Score now: 0
-                    </div>
-                </div>
-                <div class="col-md-6 col-sm-6">
-                    <div class="dealer">
-                        <p>Dealer</p>
-                        <ul class="dealer-cards">
-                          <li>
-                            <p id="d1">
-                                <i class="fa fa-heart" aria-hidden="true"></i>
-                            </p>
-                          </li>
-                          <li>
-                            <p id="d2">
-                                <i class="fa fa-heart" aria-hidden="true"></i>
-                            </p>
-                          </li>
-                        </ul>
-                    </div>
-                    <div class="player">
-                        <p>Player</p>
-                        <ul class="player-cards">
-                          <li>
-                            <p id="p1">
-                                <i class="fa fa-heart" aria-hidden="true"></i>
-                            </p>
-                          </li>
-                          <li>
-                            <p id="p2">
-                                <i class="fa fa-heart" aria-hidden="true"></i>
-                            </p>
-                          </li>
-                        </ul>
-                    </div>
-                </div>
-                <div class="col-md-3 col-sm-3 ">
-                    <div class="col-md-4 buttons">
-                        <button class="btn btn-primary" id="start" onclick="start()">Start</button>
-                        <button class="btn btn-primary" id="addcard">Add card</button>
-                        <button class="btn btn-primary" id="results" >Results</button>
-                    </div>
-                </div>
-            </div>
-        </div>
+              <div class="col-md-3 col-sm-3 stats">
+                  <h4>Nick: <strong><%= user.nick %></strong></h4>
+                  <p class="plays">Plays: <%= user.playsCount %> </p>
+                  <%   if (user.wins != 0 && user.playsCount !=0){ %>
+                    <p class="winns">Wins: <%= user.wins %>  (<%= (user.wins/user.playsCount*100).toFixed(1)  %>%) </p>
+                  <% } else {%>
+                    <p class="winns">Wins: 0</p>
+
+                  <% } %>
+                  <div class="btn btn-danger disabled" id="gameScope">
+                    Score now: 0
+                  </div>
+              </div>
+              <div class="col-md-6 col-sm-6">
+                  <div class="dealer">
+                      <p>Dealer</p>
+                      <ul class="dealer-cards">
+                        <li>
+                          <p id="d1">
+                              <i class="fa fa-heart" aria-hidden="true"></i>
+                          </p>
+                        </li>
+                        <li>
+                          <p id="d2">
+                              <i class="fa fa-heart" aria-hidden="true"></i>
+                          </p>
+                        </li>
+                      </ul>
+                  </div>
+                  <div class="player">
+                      <p>Player</p>
+                      <ul class="player-cards">
+                        <li>
+                          <p id="p1">
+                              <i class="fa fa-heart" aria-hidden="true"></i>
+                          </p>
+                        </li>
+                        <li>
+                          <p id="p2">
+                              <i class="fa fa-heart" aria-hidden="true"></i>
+                          </p>
+                        </li>
+                      </ul>
+                  </div>
+              </div>
+              <div class="col-md-3 col-sm-3 ">
+                  <div class="col-md-4 buttons">
+                      <button class="btn btn-primary" id="start" onclick="start()">Start</button>
+                      <button class="btn btn-primary" id="addcard">Add card</button>
+                      <button class="btn btn-primary" id="results" >Results</button>
+                  </div>
+              </div>
+          </div>
+      </div>
     </div>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
      <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/1.7.3/socket.io.js"></script>
     <script>
-      var socket = io.connect('http://localhost:5000');
+      function reload(){
+        location.reload();
+      }
+
+      let socket = io.connect('http://localhost:5000');
       socket.emit('sendUser', '<%= user._id %>');
       socket.on('reload',()=>{
-        location.reload();
+        // reload();
       })
       $('#addcard').hide();
       $('#results').hide();
@@ -142,35 +159,54 @@
               }
             }
           })
+          $('#submitModal').click(function(){
+            reload();
+          })
           $('#results').click(function(){
             checkResults();
           });
+          function showModal(){
+            $('#playerModal').css("display", "block");
+            $('#playerModal').addClass(' in');
+            $('#playerModal').modal({
+                show:true,
+                backdrop:true,
+                keyboard:true
+            })
+          }
           function checkResults(){
             let playerSum = getSum(player);
             let dealerSum = getSum(dealer);
             if (playerSum > 21 || playerSum == 21){
               if (playerSum > 21) {
-                alert(`Проигрыш!! Вы набрали ${playerSum} очка(ов) и проиграли, нажмите 'ОК' для новой игры`);
-                // $('#myModal').css("display", "block");
-                // $('#myModal').addClass(" in");
-
+                showModal();
+                $('#lose-info-message').addClass(' alert-danger');
+                $('#lose-info-message').text(`Проигрыш!! Вы набрали ${playerSum} очка(ов) и проиграли, нажмите 'ОК' для новой игры`);
                 socket.emit('playerLoose', playerSum, dealerSum);
               } else if (playerSum == 21 && dealerSum == 21 ) {
-                alert(`Ничья!! Вы набрали 21 очко как и дилер, нажмите 'ОК' для новой игры`);
+                $('#lose-info-message').addClass(' alert-warning');
+                $('#lose-info-message').text(`Ничья!! Вы набрали 21 очко как и дилер, нажмите 'ОК' для новой игры`);
                 socket.emit('draw', playerSum, dealerSum);
               } else {
-                alert(`Победа!! Вы набрали 21 очко, а диллер ${dealerSum}, нажмите 'ОК' для новой игры`);
+                $('#lose-info-message').addClass(' alert-success');
+                $('#lose-info-message').text(`Победа!! Вы набрали 21 очко, а диллер ${dealerSum}, нажмите 'ОК' для новой игры`);
                 socket.emit('playerWin', playerSum, dealerSum);
               }
             } else {
               if (playerSum > dealerSum) {
-                alert(`Победа!!Вы набрали ${playerSum} очка(ов), а дилер ${dealerSum}, нажмите 'ОК' для новой игры`);
+                showModal();
+                $('#lose-info-message').addClass(' alert-success');
+                $('#lose-info-message').text(`Победа!!Вы набрали ${playerSum} очка(ов), а дилер ${dealerSum}, нажмите 'ОК' для новой игры`);
                 socket.emit('playerWin', playerSum, dealerSum);
               } else if (playerSum < dealerSum) {
-                alert(`Проигрыш!! Вы набрали ${playerSum} очка(ов), а дилер ${dealerSum}, нажмите 'ОК' для новой игры`);
-                socket.emit('playerLoose', playerSum, dealerSum);
+                showModal();
+                $('#lose-info-message').addClass(' alert-danger');
+                $('#lose-info-message').text(`Проигрыш!! Вы набрали ${playerSum} очка(ов), а дилер ${dealerSum}, нажмите 'ОК' для новой игры`);
+                socket.emit('playerWin', playerSum, dealerSum);
               } else {
-                alert(`Ничья!! Вы набрали ${playerSum} очка(ов), а дилер ${dealerSum}, нажмите 'ОК' для новой игры`);
+                showModal();
+                $('#lose-info-message').addClass(' alert-warning');
+                $('#lose-info-message').text(`Ничья!! Вы набрали ${playerSum} очка(ов), а дилер ${dealerSum}, нажмите 'ОК' для новой игры`);
                 socket.emit('draw', playerSum, dealerSum);
               }
             }
