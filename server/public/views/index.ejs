@@ -1,0 +1,160 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Document</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <link href="//netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css" rel="stylesheet">
+    <link rel="stylesheet" href="../public/views/style.css">
+</head>
+<body>
+    <div class="wrapper">
+        <br>
+        <div class="container">
+            <div class="row">
+                <div class="col-md-3 col-md-offset-1 col-sm-3 col-sm-offset-1 stats">
+                    <h4>User name: <%= user.nick %></h4>
+                    <p class="plays">Plays: <%= user.playsCount %> </p>
+                    <p class="winns">Wins: <%= (user.wins/user.playsCount*100) %>%</p>
+                    <p class="scope" id="gameScope">Scope now: </p>
+                </div>
+                <div class="col-md-3 col-sm-3">
+                    <div class="dealer">
+                        <p>Dealer</p>
+                        <div class="dealer-card">
+                            <p id="d1">
+                                <i class="fa fa-heart" aria-hidden="true"></i>
+                            </p>
+                        </div>
+                        <div class="dealer-card">
+                            <p id="d2">
+                                <i class="fa fa-heart" aria-hidden="true"></i>
+                            </p>
+                        </div>
+                    </div>
+                    <div class="player">
+                        <p>Player</p>
+                        <div class="player-card">
+                            <p id="p1">
+                                <i class="fa fa-heart" aria-hidden="true"></i>
+                            </p>
+                        </div>
+                        <div class="player-card">
+                            <p id="p2">
+                                <i class="fa fa-heart" aria-hidden="true"></i>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3 col-sm-3 ">
+                    <div class="col-md-4 buttons">
+                        <button class="btn btn-primary" id="start" onclick="start()">Start</button>
+                        <button class="btn btn-primary" id="addcard">Add card</button>
+                        <button class="btn btn-primary" id="results" >Results</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/1.7.3/socket.io.js"></script>
+    <script>
+      var socket = io.connect('http://localhost:5000');
+      socket.emit('sendUser', '<%= user._id %>');
+      socket.on('reload',()=>{
+        console.log("reload");
+        location.reload();
+      })
+      $('#addcard').hide();
+      $('#results').hide();
+      $('.scope').hide();
+      function start(){
+        $('#addcard').show();
+        $('#results').show();
+        $('.scope').show();
+          function getRandomInt(min, max) {
+              return Math.floor(Math.random() * (max - min + 1)) + min;
+          }
+          function getCard() {
+              let cards = ["2","3","4","5","6","7","8","9","10","J","Q","K","A"];
+              return cards[getRandomInt(0, cards.length -1)];
+          }
+          function getSum(arr) {
+              let sum = 0;
+              arr.forEach((item)=>{
+                  if(item!="A") {
+                      if (item == "J" || item == "Q" || item == "K") item=10;
+                      else item = parseInt(item);
+                      sum+=item;
+                  } else {
+                      if (sum>10) sum++;
+                      else sum+=11;
+                  }
+              });
+              return sum;
+          }
+          function getStatus(){
+              return "Дилер: " + dealer.join(" ") + "  Игрок: " + player.join(" ") + ".";
+          }
+          function addCard(){
+            console.log("Call")
+              let cardNumber = getCard();
+              $('#gameScope').text(`Scope now: ${getSum(player)}`);
+              $('.player').append(`
+                   <div class="player-card">
+                          <p id="p1">
+                              ${cardNumber}
+                          </p>
+                      </div>
+              `);
+              $('.player-card').css("padding", "0px 15%");
+              $('.player-card').css("width", "0px");
+              return(cardNumber);
+          }
+          let dealer = [getCard(), getCard()];
+          let player = [getCard(), getCard()];
+          let answer="";
+          $('#p1').text(player[0]);
+          $('#p2').text(player[1]);
+          $('#d1').text(dealer[0]);
+          $('#gameScope').text(`Scope now: ${getSum(player)}`);
+          $('#addcard').click(function(){
+            let newCard = addCard();
+            player.push(newCard);
+            $('#gameScope').text(`Scope now: ${getSum(player)}`);
+          })
+          $('#results').click(function(){
+            checkResults();
+          });
+          function checkResults(){
+            let playerSum = getSum(player);
+            let dealerSum = getSum(dealer);
+            if (playerSum > 21 || playerSum == 21){
+              if (playerSum > 21) {
+                alert(`Проигрыш!! Вы набрали ${playerSum} очка(ов) и проиграли, нажмите 'ОК' для новой игры`);
+                socket.emit('playerLoose', playerSum, dealerSum);
+              } else if (playerSum == 21 && dealerSum == 21 ) {
+                alert(`Ничья!! Вы набрали 21 очко как и дилер, нажмите 'ОК' для новой игры`);
+                socket.emit('draw', playerSum, dealerSum);
+              } else {
+                alert(`Победа!! Вы набрали 21 очко, а диллер ${dealerSum}, нажмите 'ОК' для новой игры`);
+                socket.emit('playerWin', playerSum, dealerSum);
+              }
+            } else {
+              if (playerSum > dealerSum) {
+                alert(`Победа!!Вы набрали ${playerSum} очка(ов), а дилер ${dealerSum}, нажмите 'ОК' для новой игры`);
+                socket.emit('playerWin', playerSum, dealerSum);
+              } else if (playerSum < dealerSum) {
+                alert(`Проигрыш!! Вы набрали ${playerSum} очка(ов), а дилер ${dealerSum}, нажмите 'ОК' для новой игры`);
+                socket.emit('playerLoose', playerSum, dealerSum);
+              } else {
+                alert(`Ничья!! Вы набрали ${playerSum} очка(ов), а дилер ${dealerSum}, нажмите 'ОК' для новой игры`);
+                socket.emit('draw', playerSum, dealerSum);
+              }
+            }
+          }
+      }
+    </script>
+</body>
+</html>
