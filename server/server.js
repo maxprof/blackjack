@@ -22,8 +22,6 @@ var _path2 = _interopRequireDefault(_path);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-var helper = require('./config/helper.js');
-
 var logger = require('morgan');
 var vLogger = require('log4js').getLogger();
 var errorHandler = require('errorhandler');
@@ -64,21 +62,28 @@ io.sockets.on('connection', function (socket) {
     socket.on("sendUser", function (user) {
         socket.user_id = user;
     });
-    socket.on('playerLoose', function (playerScore, dealerScore, done) {
-        helpers.saveResults(socket.user_id, playerScore, dealerScore, "false", function (err) {
-            socket.emit('reload');
+
+    socket.on('playerLose', function (playerScore, dealerScore, done) {
+        helpers.saveResults(socket.user_id, playerScore, dealerScore, "false", function (err, user) {
+            if (err) return done(err);
+            console.log("Fart lose", user);
+            socket.emit('RefreshUser', user.playsCount, user.wins);
         });
     });
 
     socket.on('draw', function (playerScore, dealerScore) {
-        helpers.saveResults(socket.user_id, playerScore, dealerScore, "false", function (err) {
-            socket.emit('reload');
+        helpers.saveResults(socket.user_id, playerScore, dealerScore, "false", function (err, user) {
+            if (err) return done(err);
+            console.log("Fart draw", user);
+            socket.emit('RefreshUser', user.playsCount, user.wins);
         });
     });
 
     socket.on('playerWin', function (playerScore, dealerScore) {
-        helpers.saveResults(socket.user_id, playerScore, dealerScore, "true", function (err) {
-            socket.emit('reload');
+        helpers.saveResults(socket.user_id, playerScore, dealerScore, "true", function (err, user) {
+            if (err) return done(err);
+            console.log("Fart win", user);
+            socket.emit('RefreshUser', user.playsCount, user.wins);
         });
     });
 });

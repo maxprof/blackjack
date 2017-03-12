@@ -82,10 +82,8 @@ module.exports = {
                 user.save(function (err) {
                     if (err) return done(err);
                 });
+                return done(null, user);
             });
-        }], function (err) {
-            if (err) return done(err);
-        });
-        next();
+        }], next);
     }
 };

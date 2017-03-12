@@ -73,7 +73,7 @@ module.exports = {
         var body = req.body;
         _User2.default.findOne({ nick: body.nick }).exec(function (err, user) {
             if (err) return next(err);
-            if (!user) return res.status(404).json({ success: false, msg: 'User not found' });
+            if (!user) return res.status(404).redirect('/404');
             _bcryptNodejs2.default.compare(body.password, user.password, function (err, result) {
                 if (err) return next(err);
                 if (result === false) {

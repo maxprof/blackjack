@@ -3,7 +3,6 @@ import mongoose from 'mongoose';
 import bodyParser from 'body-parser';
 import busboy from 'busboy-body-parser';
 import path from 'path';
-const helper = require('./config/helper.js');
 
 const logger = require('morgan');
 const vLogger = require('log4js').getLogger();
@@ -48,21 +47,28 @@ io.sockets
         socket.on("sendUser", (user)=>{
             socket.user_id = user;
         });
-        socket.on('playerLoose', ( playerScore, dealerScore, done)=>{
-          helpers.saveResults(socket.user_id, playerScore, dealerScore, "false", (err) => {
-              socket.emit('reload');
+
+        socket.on('playerLose', ( playerScore, dealerScore, done)=>{
+          helpers.saveResults(socket.user_id, playerScore, dealerScore, "false", (err, user) => {
+              if (err) return done(err);
+              console.log("Fart lose", user);
+              socket.emit('RefreshUser', user.playsCount, user.wins);
           });
         });
 
         socket.on('draw', ( playerScore, dealerScore)=>{
-          helpers.saveResults(socket.user_id, playerScore, dealerScore, "false", (err) => {
-            socket.emit('reload');
+          helpers.saveResults(socket.user_id, playerScore, dealerScore, "false", (err,user) => {
+              if (err) return done(err);
+              console.log("Fart draw", user);
+              socket.emit('RefreshUser', user.playsCount, user.wins);
           });
         });
 
         socket.on('playerWin', ( playerScore, dealerScore)=>{
-          helpers.saveResults(socket.user_id, playerScore, dealerScore, "true", (err) => {
-            socket.emit('reload');
+          helpers.saveResults(socket.user_id, playerScore, dealerScore, "true", (err,user) => {
+              if (err) return done(err);
+              console.log("Fart win", user);
+              socket.emit('RefreshUser', user.playsCount, user.wins);
           });
         });
       });

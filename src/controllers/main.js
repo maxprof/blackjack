@@ -56,7 +56,7 @@ module.exports = {
             .findOne({nick: body.nick})
             .exec((err, user)=>{
                 if (err) return next(err);
-                if (!user) return res.status(404).json({success: false, msg: 'User not found'});
+                if (!user) return res.status(404).redirect('/404');
                 bcrypt.compare(body.password, user.password, (err, result) => {
                     if (err) return next(err);
                     if (result === false) {

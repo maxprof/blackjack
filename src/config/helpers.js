@@ -65,11 +65,10 @@ module.exports = {
               user.save((err)=>{
                 if (err) return done(err);
               })
+              return done(null, user);
             })
         }
-      ], (err)=>{
-          if (err) return done(err);
-      })
-      next();
+      ], next)
+
     }
 };
