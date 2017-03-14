@@ -144,7 +144,7 @@
         $('#d1').text(dealer[0]);
         if (player[0] == 'A' && player[1] == 'A') player[1] = 1;
         $('#gameScore').text(`Score now: ${getSum(player)}`);
-        $('#addcard').click(function(){
+        $('#addcard').click(()=>{
             let newCard = addCard();
             player.push(newCard);
             $('#gameScore').text(`Score now: ${getSum(player)}`);
@@ -153,10 +153,10 @@
                 showModal('playerLose', ' alert-danger',`Проигрыш!! Вы набрали больше 21 очка и проиграли, нажмите 'ОК' для новой игры`);
             }
         });
-        $('#submitModal').click(function(){
+        $('#submitModal').click(()=>{
             newGame();
         });
-        $('#results').click(function(){
+        $('#results').click(()=>{
             checkResults();
         });
         function showModal(socketName,itemClass,message){
@@ -168,7 +168,7 @@
             });
             $('#lose-info-message').addClass(itemClass);
             $('#lose-info-message').text(message);
-            $( "#playerModal" ).click(function( event ) {
+            $( "#playerModal" ).click(()=> {
                 newGame();
             });
             let playerSum = getSum(player);

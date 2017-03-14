@@ -1,7 +1,6 @@
 import express from 'express';
 import mongoose from 'mongoose';
 import bodyParser from 'body-parser';
-import busboy from 'busboy-body-parser';
 import path from 'path';
 
 const logger = require('morgan');
@@ -20,7 +19,6 @@ app.use(logger('dev'));
 app.use(errorHandler());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
-app.use(busboy());
 app.use(cookieParser());
 app.set('view engine', 'ejs');
 app.set('views', __dirname + '/public/views');
@@ -51,7 +49,6 @@ io.sockets
         socket.on('playerLose', ( playerScore, dealerScore, done)=>{
           helpers.saveResults(socket.user_id, playerScore, dealerScore, "false", (err, user) => {
               if (err) return done(err);
-              console.log("Fart lose", user);
               socket.emit('RefreshUser', user.playsCount, user.wins);
           });
         });
@@ -59,7 +56,6 @@ io.sockets
         socket.on('draw', ( playerScore, dealerScore)=>{
           helpers.saveResults(socket.user_id, playerScore, dealerScore, "false", (err,user) => {
               if (err) return done(err);
-              console.log("Fart draw", user);
               socket.emit('RefreshUser', user.playsCount, user.wins);
           });
         });
@@ -67,7 +63,6 @@ io.sockets
         socket.on('playerWin', ( playerScore, dealerScore)=>{
           helpers.saveResults(socket.user_id, playerScore, dealerScore, "true", (err,user) => {
               if (err) return done(err);
-              console.log("Fart win", user);
               socket.emit('RefreshUser', user.playsCount, user.wins);
           });
         });

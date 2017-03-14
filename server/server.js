@@ -12,10 +12,6 @@ var _bodyParser = require('body-parser');
 
 var _bodyParser2 = _interopRequireDefault(_bodyParser);
 
-var _busboyBodyParser = require('busboy-body-parser');
-
-var _busboyBodyParser2 = _interopRequireDefault(_busboyBodyParser);
-
 var _path = require('path');
 
 var _path2 = _interopRequireDefault(_path);
@@ -38,7 +34,6 @@ app.use(logger('dev'));
 app.use(errorHandler());
 app.use(_bodyParser2.default.json());
 app.use(_bodyParser2.default.urlencoded({ extended: false }));
-app.use((0, _busboyBodyParser2.default)());
 app.use(cookieParser());
 app.set('view engine', 'ejs');
 app.set('views', __dirname + '/public/views');
@@ -66,7 +61,6 @@ io.sockets.on('connection', function (socket) {
     socket.on('playerLose', function (playerScore, dealerScore, done) {
         helpers.saveResults(socket.user_id, playerScore, dealerScore, "false", function (err, user) {
             if (err) return done(err);
-            console.log("Fart lose", user);
             socket.emit('RefreshUser', user.playsCount, user.wins);
         });
     });
@@ -74,7 +68,6 @@ io.sockets.on('connection', function (socket) {
     socket.on('draw', function (playerScore, dealerScore) {
         helpers.saveResults(socket.user_id, playerScore, dealerScore, "false", function (err, user) {
             if (err) return done(err);
-            console.log("Fart draw", user);
             socket.emit('RefreshUser', user.playsCount, user.wins);
         });
     });
@@ -82,7 +75,6 @@ io.sockets.on('connection', function (socket) {
     socket.on('playerWin', function (playerScore, dealerScore) {
         helpers.saveResults(socket.user_id, playerScore, dealerScore, "true", function (err, user) {
             if (err) return done(err);
-            console.log("Fart win", user);
             socket.emit('RefreshUser', user.playsCount, user.wins);
         });
     });
